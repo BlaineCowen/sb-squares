@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "GameData" ADD COLUMN     "awayQ1" INTEGER,
+ADD COLUMN     "awayQ2" INTEGER,
+ADD COLUMN     "awayQ3" INTEGER,
+ADD COLUMN     "awayQ4" INTEGER,
+ADD COLUMN     "homeQ1" INTEGER,
+ADD COLUMN     "homeQ2" INTEGER,
+ADD COLUMN     "homeQ3" INTEGER,
+ADD COLUMN     "homeQ4" INTEGER;

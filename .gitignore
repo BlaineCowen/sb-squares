@@ -1,0 +1,13 @@
+node_modules/
+# Keep environment variables out of version control
+.env
+.env.local
+.next/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.vercel
+# Next.js build cache
+.next/cache

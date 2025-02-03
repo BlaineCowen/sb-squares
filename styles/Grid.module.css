@@ -1,0 +1,67 @@
+.square {
+  min-width: 3rem;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.square-details {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  font-size: 0.8rem;
+}
+
+.owner {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price {
+  color: #4CAF50;
+}
+
+.status {
+  font-style: italic;
+  color: #666;
+}
+
+.square-info {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.owner-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.square-status {
+  color: #666;
+  font-style: italic;
+}
+
+.available {
+  background-color: white;
+  border-color: #e5e7eb;
+}
+
+.pending {
+  background-color: #fef08a; /* yellow-200 */
+}
+
+.approved {
+  background-color: #4ade80; /* green-400 */
+} 

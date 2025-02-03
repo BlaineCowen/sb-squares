@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Grid" ADD COLUMN     "xScoreArr" TEXT NOT NULL DEFAULT '?',
+ADD COLUMN     "yScoreArr" TEXT NOT NULL DEFAULT '?';
