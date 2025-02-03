@@ -1,6 +1,12 @@
 import prisma from "../../lib/prisma";
 
+export const config = {
+  maxDuration: 30,
+  memory: 300,
+};
+
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
   console.log("Game data API called");
   if (req.method !== "GET") {
     console.log("Method not allowed:", req.method);
