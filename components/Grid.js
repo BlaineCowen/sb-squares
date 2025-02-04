@@ -197,7 +197,7 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
     <>
       <div id="grid-content" className="grid-scroll-container">
         <div className="grid-inner-content grid grid-areas-layout">
-          {gridData && (
+          {squares.length > 0 && (
             <>
               {/* Column labels (top) - Only render when gridData is loaded */}
               <div className="grid-area-top grid grid-cols-10">

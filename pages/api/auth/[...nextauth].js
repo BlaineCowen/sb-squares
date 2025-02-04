@@ -11,6 +11,17 @@ export const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          color: `#${Math.floor(Math.random() * 16777215)
+            .toString(16)
+            .padStart(6, "0")}`,
+        };
+      },
     }),
     CredentialsProvider({
       id: "credentials",
