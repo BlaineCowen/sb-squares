@@ -197,30 +197,35 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
     <>
       <div id="grid-content" className="grid-scroll-container">
         <div className="grid-inner-content grid grid-areas-layout">
-          {/* Column labels (top) */}
-          <div className="grid-area-top grid grid-cols-10">
-            {[...Array(10)].map((_, i) => (
-              <div
-                key={i}
-                className={`text-center text-sm bg-gray-50 text-gray-500 h-6 border-t border-l border-black ${
-                  i === 9 ? "border-r" : ""
-                }`}
-              >
-                {gridData.isLocked ? columnNumbers[i] : "?"}
+          {gridData && (
+            <>
+              {/* Column labels (top) - Only render when gridData is loaded */}
+              <div className="grid-area-top grid grid-cols-10">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`text-center text-sm bg-gray-50 text-gray-500 h-6 border-t border-l border-black ${
+                      i === 9 ? "border-r" : ""
+                    }`}
+                  >
+                    {gridData.isLocked ? columnNumbers[i] : "?"}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          {/* Row labels (left) */}
-          <div className="grid-area-left flex flex-col sticky left-0">
-            {[...Array(10)].map((_, i) => (
-              <div
-                key={i}
-                className="square-height flex items-center justify-center bg-gray-50 text-gray-500 w-6 border border-black"
-              >
-                {gridData.isLocked ? rowNumbers[i] : "?"}
+
+              {/* Row labels (left) - Only render when gridData is loaded */}
+              <div className="grid-area-left flex flex-col sticky left-0">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="square-height flex items-center justify-center bg-gray-50 text-gray-500 w-6 border border-black"
+                  >
+                    {gridData.isLocked ? rowNumbers[i] : "?"}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
           <div className="grid-area-main grid grid-cols-10">
             {squares.map((square) => (
               <div
@@ -259,12 +264,16 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
                       (square.status === "APPROVED" && "✅")}
                   </span>
                   <div className="flex justify-between w-full px-2 mt-1 text-xs">
-                    <span className="text-gray-600">
-                      A:{square.awayScore || "-"}
-                    </span>
-                    <span className="text-gray-600">
-                      H:{square.homeScore || "-"}
-                    </span>
+                    {square.awayScore && (
+                      <span className="text-gray-600">
+                        A:{square.awayScore}
+                      </span>
+                    )}
+                    {square.homeScore && (
+                      <span className="text-gray-600">
+                        H:{square.homeScore}
+                      </span>
+                    )}
                   </div>
                   {square.status === "PENDING" && (
                     <span className="text-xs">pending</span>

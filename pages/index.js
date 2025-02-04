@@ -44,6 +44,11 @@ export default function Home() {
   };
 
   const handleJoinGrid = (e) => {
+    // check if valid code first
+    if (joinCode.length !== 6) {
+      alert("Please enter a valid 6-character code");
+      return;
+    }
     e.preventDefault();
     router.push(`/grid/${joinCode}`);
   };
