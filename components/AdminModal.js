@@ -1,7 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
+import LoadingSpinner from "./LoadingSpinner";
 
-export default function AdminModal({ isOpen, onClose, gridCode, onUpdate }) {
+export default function AdminModal({
+  isOpen,
+  onClose,
+  gridCode,
+  onUpdate,
+  isProcessing,
+}) {
   const [tab, setTab] = useState("squares"); // squares or settings
   const [gridSettings, setGridSettings] = useState({
     name: "",
@@ -16,19 +23,19 @@ export default function AdminModal({ isOpen, onClose, gridCode, onUpdate }) {
   });
 
   const handleResetSquares = async () => {
-    if (
-      window.confirm(
-        "Are you sure you want to reset ALL squares? This cannot be undone."
-      )
-    ) {
-      try {
+    try {
+      if (
+        window.confirm(
+          "Are you sure you want to reset ALL squares? This cannot be undone."
+        )
+      ) {
         await axios.post(`/api/admin/reset-squares?gridCode=${gridCode}`);
         onUpdate();
         alert("All squares have been reset");
-      } catch (err) {
-        console.error("Error resetting squares:", err);
-        alert("Failed to reset squares");
       }
+    } catch (err) {
+      console.error("Error resetting squares:", err);
+      alert("Failed to reset squares");
     }
   };
 
@@ -146,9 +153,14 @@ export default function AdminModal({ isOpen, onClose, gridCode, onUpdate }) {
           <div className="space-y-4">
             <button
               onClick={handleResetSquares}
+              disabled={isProcessing}
               className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             >
-              Reset All Squares
+              {isProcessing ? (
+                <LoadingSpinner size={20} />
+              ) : (
+                "Reset All Squares"
+              )}
             </button>
             <button
               onClick={handleLockGrid}

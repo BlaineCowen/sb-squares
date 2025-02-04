@@ -2,40 +2,43 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Login() {
   const router = useRouter();
   const callbackUrl = router.query.callbackUrl || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignIn = () => {
     console.log("Initiating Google sign-in with callback URL:", callbackUrl);
     signIn("google", { callbackUrl });
   };
 
-  const handleTestLogin = async () => {
-    try {
-      const result = await signIn("test-account", {
-        email: "test@example.com",
-        redirect: false,
-        callbackUrl,
-      });
+  // const handleTestLogin = async () => {
+  //   try {
+  //     const result = await signIn("test-account", {
+  //       email: "test@example.com",
+  //       redirect: false,
+  //       callbackUrl,
+  //     });
 
-      if (result?.error) {
-        console.error("Login error:", result.error);
-        alert("Login failed: " + result.error);
-      } else if (result?.url) {
-        router.push(result.url);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Please try again.");
-    }
-  };
+  //     if (result?.error) {
+  //       console.error("Login error:", result.error);
+  //       alert("Login failed: " + result.error);
+  //     } else if (result?.url) {
+  //       router.push(result.url);
+  //     }
+  //   } catch (error) {
+  //     console.error("Login error:", error);
+  //     alert("Login failed. Please try again.");
+  //   }
+  // };
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const result = await signIn("credentials", {
         email,
@@ -53,6 +56,8 @@ export default function Login() {
     } catch (error) {
       console.error("Login error:", error);
       alert("Login failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -87,9 +92,10 @@ export default function Login() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            disabled={isSubmitting}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
           >
-            Sign in
+            {isSubmitting ? <LoadingSpinner size={20} /> : "Sign in"}
           </button>
         </form>
         <div className="relative my-6">
@@ -113,12 +119,6 @@ export default function Login() {
             />
           </svg>
           Sign in with Google
-        </button>
-        <button
-          onClick={handleTestLogin}
-          className="w-full bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
-        >
-          Continue as Test User
         </button>
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{" "}

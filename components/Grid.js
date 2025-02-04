@@ -5,6 +5,7 @@ import { loadStripe } from "stripe";
 import SelectionModal from "./SelectionModal";
 import AdminModal from "./AdminModal";
 import ColorPickerModal from "./ColorPickerModal";
+import LoadingSpinner from "./LoadingSpinner";
 
 function AdminBanner({ isAdmin }) {
   return isAdmin ? (
@@ -32,6 +33,7 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
     [...Array(10)].map((_, i) => i)
   );
   const [rowNumbers, setRowNumbers] = useState([...Array(10)].map((_, i) => i));
+  const [isSelecting, setIsSelecting] = useState(false);
 
   useEffect(() => {
     fetchGridData();
@@ -180,6 +182,17 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
     }
   };
 
+  const handleSquareSelect = async (x, y) => {
+    if (isSelecting) return;
+    setIsSelecting(true);
+
+    try {
+      handleSquareClick(x, y);
+    } finally {
+      setIsSelecting(false);
+    }
+  };
+
   return (
     <>
       <div id="grid-content" className="grid-scroll-container">
@@ -237,7 +250,8 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
                       ? square?.owner?.color || "#22c55e" // green-500 as fallback
                       : undefined,
                 }}
-                onClick={() => handleSquareClick(square.x, square.y)}
+                onClick={() => handleSquareSelect(square.x, square.y)}
+                disabled={!square.status || isSelecting}
               >
                 <div className="flex flex-col items-center justify-center w-full h-full">
                   <span className="text-sm font-medium text-center w-full truncate px-1">
@@ -256,6 +270,9 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
                     <span className="text-xs">pending</span>
                   )}
                 </div>
+                {isSelecting && square === selectedSquare && (
+                  <LoadingSpinner size={20} />
+                )}
               </div>
             ))}
           </div>

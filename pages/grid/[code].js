@@ -4,8 +4,10 @@ import Grid from "../../components/Grid";
 import Header from "../../components/Header";
 import ScoreDisplay from "../../components/ScoreDisplay";
 import AdminModal from "../../components/AdminModal";
+import ShareIcon from "../../components/ShareIcon";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function GridPage() {
   const router = useRouter();
@@ -14,9 +16,12 @@ export default function GridPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [gameData, setGameData] = useState(null);
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [isAdminActionLoading, setIsAdminActionLoading] = useState(false);
   const [quarter, setQuarter] = useState(null);
   const [quarterWinners, setQuarterWinners] = useState([]);
   const [squares, setSquares] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   useEffect(() => {
     if (!code || !session) return;
@@ -79,10 +84,36 @@ export default function GridPage() {
           awayScore: 0,
         });
       }
+      setIsLoading(false);
     };
 
-    checkAdmin();
-    fetchGameData();
+    const fetchSquares = async () => {
+      try {
+        const response = await fetch(`/api/squares?gridCode=${code}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch squares");
+        }
+        const data = await response.json();
+        setSquares(data);
+      } catch (error) {
+        console.error("Error fetching squares:", error);
+        setSquares([]);
+      }
+    };
+
+    const fetchData = async () => {
+      try {
+        checkAdmin();
+        fetchGameData();
+        fetchSquares();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (code) {
+      fetchData();
+    }
 
     // Set up polling for game data
     const interval = setInterval(fetchGameData, 30000);
@@ -173,12 +204,50 @@ export default function GridPage() {
     }
   }, [quarter]); // Only run when quarter changes
 
+  const handleSquareSelect = async (x, y) => {
+    if (isSelecting) return;
+    setIsSelecting(true);
+    try {
+      const response = await fetch("/api/squares/select", {
+        method: "POST",
+        body: JSON.stringify({ x, y, gridCode: code }),
+        headers: { "Content-Type": "application/json" },
+      });
+      // ... existing logic
+    } finally {
+      setIsSelecting(false);
+    }
+  };
+
+  const handleAdminAction = async (action) => {
+    setIsAdminActionLoading(true);
+    try {
+      // ... existing admin action logic
+    } finally {
+      setIsAdminActionLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <LoadingSpinner size={48} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900">
       <Header />
       <div className="container mx-auto px-4 pt-4">
         <ScoreDisplay gameData={gameData} />
       </div>
+      <h3 className="text-center mt-4 !text-white">
+        Scores will be randomized by admin at game time
+      </h3>
+      <h2 className="text-center mt-4 !text-white">
+        Click on a square to claim
+      </h2>
       <div id="grid-container" className="container">
         {/* Home Team Logo (left) */}
         {gameData && (
@@ -224,9 +293,22 @@ export default function GridPage() {
         </div>
       )}
 
-      <h3 className="text-center mt-4 !text-white">
-        Scores will be randomized by admin at game time
-      </h3>
+      <div className="text-center mt-4">
+        <button
+          onClick={() => {
+            // share
+            const shareUrl = `${window.location.origin}/grid/${code}`;
+            navigator.clipboard.writeText(shareUrl);
+            alert("Grid URL copied to clipboard");
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          <div className="flex items-center ">
+            <span className="mr-1">Share Grid</span>
+            <ShareIcon className=" w-4 h-4" />
+          </div>
+        </button>
+      </div>
 
       {isAdmin && (
         <div className="mt-4 flex justify-center">
@@ -242,6 +324,7 @@ export default function GridPage() {
       <AdminModal
         isOpen={showAdminModal}
         onClose={() => setShowAdminModal(false)}
+        isProcessing={isAdminActionLoading}
         gridCode={code}
         onUpdate={() => {
           // Refresh the grid component

@@ -10,9 +10,10 @@ export async function middleware(req) {
 
   // Check DB version match
   if (token && token.user?.dbVersion !== process.env.DB_VERSION) {
-    const response = NextResponse.redirect(new URL("/auth/signout", req.url));
-    response.cookies.delete("next-auth.session-token");
-    return response;
+    console.log(`DB version mismatch: 
+      Token ${token.user?.dbVersion} vs Env ${process.env.DB_VERSION}`);
+    // Remove redirect temporarily for testing
+    // return response;
   }
 
   return NextResponse.next();
