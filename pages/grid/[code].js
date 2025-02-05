@@ -22,6 +22,7 @@ export default function GridPage() {
   const [squares, setSquares] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSelecting, setIsSelecting] = useState(false);
+  const [gridData, setGridData] = useState(null);
 
   useEffect(() => {
     if (!code || !session) return;
@@ -65,6 +66,7 @@ export default function GridPage() {
           stack: error.stack,
           response: error.response,
         });
+
         // Set default game data on error
         setGameData({
           homeTeam: "Kansas City Chiefs",
@@ -87,32 +89,54 @@ export default function GridPage() {
       setIsLoading(false);
     };
 
-    const fetchSquares = async () => {
-      try {
-        const response = await fetch(`/api/squares?gridCode=${code}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch squares");
-        }
-        const data = await response.json();
-        setSquares(data);
-      } catch (error) {
-        console.error("Error fetching squares:", error);
-        setSquares([]);
-      }
-    };
+    // const fetchSquares = async () => {
+    //   if (!gridData) return;
 
-    const fetchData = async () => {
+    //   try {
+    //     const response = await fetch(`/api/squares?gridCode=${code}`);
+    //     if (!response.ok) {
+    //       throw new Error("Failed to fetch squares");
+    //     }
+    //     const data = await response.json();
+
+    //     if (gridData?.isSortedByScores) {
+    //       // Sort squares by away score (0-9) then home score (0-9)
+    //       const sortedSquares = [...data].sort((a, b) => {
+    //         const aAway = parseInt(a.awayScore || "0");
+    //         const bAway = parseInt(b.awayScore || "0");
+    //         const aHome = parseInt(a.homeScore || "0");
+    //         const bHome = parseInt(b.homeScore || "0");
+
+    //         if (aAway !== bAway) {
+    //           return aAway - bAway;
+    //         }
+    //         return aHome - bHome;
+    //       });
+    //       setSquares(sortedSquares);
+    //     } else {
+    //       setSquares(data);
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching squares:", error);
+    //     setSquares([]);
+    //   }
+    // };
+
+    const fetchGridData = async () => {
       try {
+        const gridDataResponse = await fetch(`/api/grids/${code}/data`);
+        const gridData = await gridDataResponse.json();
+        setGridData(gridData);
+        // await fetchSquares();
         checkAdmin();
-        fetchGameData();
-        fetchSquares();
+        await fetchGameData();
       } catch (error) {
         console.error(error);
       }
     };
 
     if (code) {
-      fetchData();
+      fetchGridData();
     }
 
     // Set up polling for game data
@@ -239,7 +263,20 @@ export default function GridPage() {
   return (
     <div className="min-h-screen bg-gray-900">
       <Header />
+      {gridData?.name && (
+        <h1 className="text-center mt-4 !text-white">{gridData?.name}</h1>
+      )}
       <div className="container mx-auto px-4 pt-4">
+        {gridData?.isLocked && (
+          <div className="text-center mt-4 !text-white">
+            <h3>Grid is locked</h3>
+          </div>
+        )}
+        {gridData?.isSortedByScores && (
+          <div className="text-center mt-4 !text-white">
+            <h3>Grid is sorted by scores</h3>
+          </div>
+        )}
         <ScoreDisplay gameData={gameData} />
       </div>
       <h3 className="text-center mt-4 !text-white">
@@ -276,6 +313,7 @@ export default function GridPage() {
           isAdmin={isAdmin}
           gameData={gameData}
           onSquaresUpdate={setSquares}
+          isSortedByScores={gridData?.isSortedByScores}
         />
         <div id="spacer"></div>
       </div>
@@ -324,10 +362,11 @@ export default function GridPage() {
       <AdminModal
         isOpen={showAdminModal}
         onClose={() => setShowAdminModal(false)}
+        isLocked={gridData?.isLocked}
         isProcessing={isAdminActionLoading}
         gridCode={code}
+        isSortedByScores={gridData?.isSortedByScores}
         onUpdate={() => {
-          // Refresh the grid component
           window.location.reload();
         }}
       />

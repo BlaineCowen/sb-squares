@@ -25,6 +25,7 @@ export default async function handler(req, res) {
         ownerId: true,
         id: true,
         squarePrice: true,
+        isLocked: true,
       },
     });
 
@@ -37,28 +38,35 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    // Delete all squares for this grid
-    await prisma.square.deleteMany({
-      where: { gridId: grid.id },
-    });
+    // Start a transaction to ensure all operations succeed or fail together
+    await prisma.$transaction([
+      // Delete all squares for this grid
+      prisma.square.deleteMany({
+        where: { gridId: grid.id },
+      }),
 
-    // Create new empty squares
-    const squares = [];
-    for (let x = 0; x < 10; x++) {
-      for (let y = 0; y < 10; y++) {
-        squares.push({
+      // Create new empty squares
+      prisma.square.createMany({
+        data: Array.from({ length: 100 }, (_, i) => ({
           gridId: grid.id,
-          x,
-          y,
+          x: Math.floor(i / 10),
+          y: i % 10,
           status: "AVAILABLE",
           price: grid.squarePrice,
-        });
-      }
-    }
+        })),
+      }),
 
-    await prisma.square.createMany({
-      data: squares,
-    });
+      // Reset grid lock status and score arrays
+      prisma.grid.update({
+        where: { code: gridCode },
+        data: {
+          isLocked: false,
+          xScoreArr: "?",
+          yScoreArr: "?",
+          isSortedByScores: false,
+        },
+      }),
+    ]);
 
     return res.json({ success: true });
   } catch (error) {

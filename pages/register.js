@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 export default function Register() {
   const router = useRouter();
@@ -34,8 +35,18 @@ export default function Register() {
         throw new Error(data.error || "Registration failed");
       }
 
-      // Redirect to login page
-      router.push("/login?registered=true");
+      // Sign in the user after successful registration
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      router.push("/");
     } catch (error) {
       setError(error.message);
     }

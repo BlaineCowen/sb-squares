@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "clean": "rm -rf .next/cache node_modules",
-    "dev": "npm run clean && next dev",
+    "clean": "rm -rf .next/cache",
+    "dev": "next dev",
     "prisma:gen": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "build": "next build",

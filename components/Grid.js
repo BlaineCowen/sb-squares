@@ -7,15 +7,13 @@ import AdminModal from "./AdminModal";
 import ColorPickerModal from "./ColorPickerModal";
 import LoadingSpinner from "./LoadingSpinner";
 
-function AdminBanner({ isAdmin }) {
-  return isAdmin ? (
-    <div className="bg-yellow-400 text-black p-2 text-center font-bold">
-      ADMIN MODE ENABLED
-    </div>
-  ) : null;
-}
-
-export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
+export default function Grid({
+  gridCode,
+  isAdmin,
+  gameData,
+  onSquaresUpdate,
+  isSortedByScores,
+}) {
   const { data: session } = useSession();
   const [squares, setSquares] = useState([]);
   const [selectedSquare, setSelectedSquare] = useState(null);
@@ -58,7 +56,7 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
         yScoreArr: data.yScoreArr === "?" ? "?" : JSON.parse(data.yScoreArr),
       });
 
-      if (data.isLocked) {
+      if (data.isLocked && !gridData.isSortedByScores) {
         setColumnNumbers(
           data.xScoreArr === "?" ? columnNumbers : JSON.parse(data.xScoreArr)
         );
@@ -74,11 +72,28 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
   const fetchSquares = async () => {
     try {
       const { data } = await axios.get(`/api/squares?gridCode=${gridCode}`);
-      // Data is already sorted from the API
-      setSquares(data);
+      let squaresToSet = data;
+
+      if (isSortedByScores) {
+        // Sort squares by away score (0-9) then home score (0-9)
+        squaresToSet = [...data].sort((a, b) => {
+          const aAway = parseInt(a.awayScore || "0");
+          const bAway = parseInt(b.awayScore || "0");
+          const aHome = parseInt(a.homeScore || "0");
+          const bHome = parseInt(b.homeScore || "0");
+
+          if (aAway !== bAway) {
+            return aAway - bAway;
+          }
+          return aHome - bHome;
+        });
+      }
+
+      setSquares(squaresToSet);
+
       // Call the callback with updated squares
       if (onSquaresUpdate) {
-        onSquaresUpdate(data);
+        onSquaresUpdate(squaresToSet);
       }
     } catch (error) {
       console.error("Error fetching squares:", error);
@@ -199,7 +214,7 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
         <div className="grid-inner-content grid grid-areas-layout">
           {gridData && (
             <>
-              {/* Column labels (top) - Only render when gridData is loaded */}
+              {/* Column labels (top) */}
               <div className="grid-area-top grid grid-cols-10">
                 {[...Array(10)].map((_, i) => (
                   <div
@@ -208,19 +223,27 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
                       i === 9 ? "border-r" : ""
                     }`}
                   >
-                    {gridData.isLocked ? columnNumbers[i] : "?"}
+                    {gridData.isLocked && !isSortedByScores
+                      ? columnNumbers[i]
+                      : isSortedByScores
+                      ? i
+                      : "?"}
                   </div>
                 ))}
               </div>
 
-              {/* Row labels (left) - Only render when gridData is loaded */}
+              {/* Row labels (left) */}
               <div className="grid-area-left flex flex-col sticky left-0">
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
                     className="square-height flex items-center justify-center bg-gray-50 text-gray-500 w-6 border border-black"
                   >
-                    {gridData.isLocked ? rowNumbers[i] : "?"}
+                    {gridData.isLocked && !isSortedByScores
+                      ? rowNumbers[i]
+                      : isSortedByScores
+                      ? i
+                      : "?"}
                   </div>
                 ))}
               </div>

@@ -28,7 +28,9 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const grid = await prisma.grid.findUnique({
         where: { code: gridCode },
-        select: { id: true },
+        select: {
+          id: true,
+        },
       });
 
       if (!grid) return res.status(404).json({ error: "Grid not found" });
