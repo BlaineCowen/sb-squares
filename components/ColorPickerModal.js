@@ -16,13 +16,15 @@ export default function ColorPickerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white backdrop-blur-xl bg-opacity-90 p-8 rounded-2xl shadow-2xl animate-slide-in">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
+      <div className="fixed top-20 right-4 md:right-8 bg-white backdrop-blur-xl bg-opacity-90 p-6 rounded-2xl shadow-2xl animate-slide-in z-50">
         <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100">
           Choose Your Color
         </h3>
 
-        <HexColorPicker color={color || "#22c55e"} onChange={setColor} />
+        <div className="w-full" style={{ height: "min(60vw, 200px)" }}>
+          <HexColorPicker color={color || "#22c55e"} onChange={setColor} />
+        </div>
 
         <div className="mt-6 flex justify-end gap-3">
           <button

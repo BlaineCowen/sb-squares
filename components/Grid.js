@@ -260,7 +260,7 @@ export default function Grid({
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
-                    className={`flex items-center justify-center bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 dark:text-gray-200 w-8 border-r-2 border-gray-200 dark:border-gray-700 font-semibold`}
+                    className={`text-center text-sm bg-gradient-to-l from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-200 border-b-2 border-gray-200 dark:border-gray-700 font-semibold flex items-center justify-center`}
                     style={{ height: "var(--row-height)" }}
                   >
                     {gridData.isLocked && !isSortedByScores

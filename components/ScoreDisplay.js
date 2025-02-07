@@ -94,7 +94,7 @@ function TeamSection({ name, logo, score, color, isHome }) {
           alt={`${name} logo`}
           layout="fill"
           objectFit="contain"
-          className="rounded-full bg-white p-1"
+          className="rounded-full bg-white p-1 z-10"
         />
       </div>
       <h2 className="text-lg md:text-xl font-bold text-center">{name}</h2>

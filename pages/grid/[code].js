@@ -280,17 +280,15 @@ export default function GridPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
       <Header />
       {gridData?.name && (
-        <h1 className="text-center mt-4 !text-white">{gridData?.name}</h1>
+        <h1 className="text-center mt-4 ">{gridData?.name}</h1>
       )}
       <div className="container mx-auto px-4 pt-4">
         <ScoreDisplay gameData={gameData} />
       </div>
-      <h3 className="text-center mt-4 !text-white">
+      <h3 className="text-center mt-4 ">
         Scores will be randomized by admin at game time
       </h3>
-      <h2 className="text-center mt-4 !text-white">
-        Click on a square to claim
-      </h2>
+      <h2 className="text-center mt-4">Click on a square to claim</h2>
       <div id="grid-container" className="container">
         {/* Home Team Logo (left) */}
         {gameData && (
