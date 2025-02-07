@@ -14,13 +14,13 @@ export default async function handler(req, res) {
 
   try {
     const { color } = req.body;
-    const user = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: { color },
       select: { color: true },
     });
 
-    return res.json(user);
+    return res.status(200).json({ success: true, user: updatedUser });
   } catch (error) {
     console.error("Color update error:", error);
     return res.status(500).json({ error: "Failed to update color" });

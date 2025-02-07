@@ -5,14 +5,18 @@ import Link from "next/link";
 import ColorPickerModal from "./ColorPickerModal";
 
 export default function Header({ code }) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const router = useRouter();
   const [userGrids, setUserGrids] = useState([]);
   const [selectedGrid, setSelectedGrid] = useState(code || "");
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(
-    session?.user?.color || "#000000"
-  );
+  const [selectedColor, setSelectedColor] = useState(null);
+
+  useEffect(() => {
+    if (session?.user?.color) {
+      setSelectedColor(session.user.color);
+    }
+  }, [session]);
 
   const updateUserColor = async (color) => {
     try {
@@ -22,6 +26,12 @@ export default function Header({ code }) {
         body: JSON.stringify({ color }),
       });
       if (!response.ok) throw new Error("Failed to update color");
+      const data = await response.json();
+      setSelectedColor(color);
+      await update({
+        ...session,
+        user: { ...session.user, color: data.user.color },
+      });
     } catch (error) {
       console.error("Error updating color:", error);
       alert("Failed to update color");
@@ -46,7 +56,10 @@ export default function Header({ code }) {
             <button
               onClick={() => setShowColorPicker(!showColorPicker)}
               className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
-              style={{ backgroundColor: selectedColor }}
+              style={{
+                backgroundColor:
+                  selectedColor || session?.user?.color || "#22c55e",
+              }}
             >
               Pick Color
             </button>
@@ -71,10 +84,9 @@ export default function Header({ code }) {
         onClose={() => setShowColorPicker(false)}
         onConfirm={async (color) => {
           await updateUserColor(color);
-          setSelectedColor(color);
           setShowColorPicker(false);
         }}
-        initialColor={selectedColor}
+        initialColor={selectedColor || session?.user?.color || "#22c55e"}
       />
     </header>
   );

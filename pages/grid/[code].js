@@ -267,16 +267,6 @@ export default function GridPage() {
         <h1 className="text-center mt-4 !text-white">{gridData?.name}</h1>
       )}
       <div className="container mx-auto px-4 pt-4">
-        {gridData?.isLocked && (
-          <div className="text-center mt-4 !text-white">
-            <h3>Grid is locked</h3>
-          </div>
-        )}
-        {gridData?.isSortedByScores && (
-          <div className="text-center mt-4 !text-white">
-            <h3>Grid is sorted by scores</h3>
-          </div>
-        )}
         <ScoreDisplay gameData={gameData} />
       </div>
       <h3 className="text-center mt-4 !text-white">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HexColorPicker } from "react-colorful";
 
 export default function ColorPickerModal({
@@ -7,7 +7,11 @@ export default function ColorPickerModal({
   onConfirm,
   initialColor,
 }) {
-  const [selectedColor, setSelectedColor] = useState(initialColor || "#22c55e");
+  const [color, setColor] = useState(null);
+
+  useEffect(() => {
+    setColor(initialColor);
+  }, [initialColor]);
 
   if (!isOpen) return null;
 
@@ -16,7 +20,7 @@ export default function ColorPickerModal({
       <div className="bg-white p-6 rounded-lg shadow-xl">
         <h3 className="text-lg font-medium mb-4">Choose Your Color</h3>
 
-        <HexColorPicker color={selectedColor} onChange={setSelectedColor} />
+        <HexColorPicker color={color || "#22c55e"} onChange={setColor} />
 
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -27,7 +31,7 @@ export default function ColorPickerModal({
           </button>
           <button
             onClick={() => {
-              onConfirm(selectedColor);
+              onConfirm(color);
               onClose();
             }}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
