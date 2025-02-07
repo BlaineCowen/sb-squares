@@ -1,70 +1,114 @@
 import { useState } from "react";
+import Image from "next/image";
 
 export default function ScoreDisplay({ gameData }) {
   if (!gameData) {
     return (
-      <div className="bg-white shadow-md text-black rounded-lg p-4 mb-6 max-w-2xl mx-auto">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-48 mx-auto mb-4"></div>
-          <div className="flex justify-center items-center space-x-8">
-            <div className="text-center">
-              <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
-              <div className="h-6 bg-gray-200 rounded w-12 mx-auto mt-2"></div>
+      <div className="w-full max-w-3xl mx-auto bg-gray-100 rounded-lg shadow-xl overflow-hidden animate-pulse">
+        <div className="p-6">
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-300 rounded-full" />
+              <div className="h-4 bg-gray-300 rounded w-24" />
+              <div className="h-8 bg-gray-300 rounded w-12" />
             </div>
-            <div className="h-6 w-6 bg-gray-200 rounded"></div>
-            <div className="text-center">
-              <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
-              <div className="h-6 bg-gray-200 rounded w-12 mx-auto mt-2"></div>
+            <div className="text-center space-y-2">
+              <div className="h-6 bg-gray-300 rounded w-32" />
+              <div className="h-8 bg-gray-300 rounded w-24" />
+            </div>
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-300 rounded-full" />
+              <div className="h-4 bg-gray-300 rounded w-24" />
+              <div className="h-8 bg-gray-300 rounded w-12" />
             </div>
           </div>
-          <div className="h-4 bg-gray-200 rounded w-32 mx-auto mt-4"></div>
         </div>
       </div>
     );
   }
 
+  const {
+    awayTeam,
+    homeTeam,
+    awayScore,
+    homeScore,
+    status,
+    quarter,
+    time,
+    awayLogo,
+    homeLogo,
+    awayColor = "#E31837",
+    homeColor = "#004C54",
+  } = gameData;
+
   return (
-    <div className="bg-white shadow-md text-black rounded-lg p-4 mb-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold text-center mb-4">Super Bowl LVIII</h2>
-      <div className="flex justify-center items-center space-x-8">
-        <div className="text-center">
-          <img
-            src={gameData.awayLogo}
-            alt={gameData.awayTeam}
-            className="h-16 w-16 mx-auto mb-2 object-contain"
+    <div className="w-full max-w-3xl mx-auto rounded-lg shadow-xl overflow-hidden">
+      <div
+        className="p-6 text-white"
+        style={{
+          background: `linear-gradient(to right, ${homeColor}, ${awayColor})`,
+        }}
+      >
+        <div className="flex justify-between items-center">
+          {/* Home Team */}
+          <TeamSection
+            name={homeTeam}
+            logo={homeLogo}
+            score={homeScore}
+            color={homeColor}
+            isHome={true}
           />
-          <div className="font-bold">{gameData.awayTeam}</div>
-          <div className="text-2xl font-bold">{gameData.awayScore}</div>
-        </div>
 
-        <div className="text-xl font-bold">VS</div>
+          {/* Game Info */}
+          <div className="text-center space-y-2 bg-black/30 p-4 rounded-xl">
+            <p className="text-xl md:text-2xl font-semibold">Q{quarter}</p>
+            <p className="text-2xl md:text-4xl font-bold">{time}</p>
+            <p className="text-sm uppercase tracking-wider">{status}</p>
+          </div>
 
-        <div className="text-center">
-          <img
-            src={gameData.homeLogo}
-            alt={gameData.homeTeam}
-            className="h-16 w-16 mx-auto mb-2 object-contain"
+          {/* Away Team */}
+          <TeamSection
+            name={awayTeam}
+            logo={awayLogo}
+            score={awayScore}
+            color={awayColor}
+            isHome={false}
           />
-          <div className="font-bold">{gameData.homeTeam}</div>
-          <div className="text-2xl font-bold">{gameData.homeScore}</div>
         </div>
-      </div>
-
-      <div className="text-center mt-4 text-sm text-gray-600">
-        {gameData.status === "pre" ? (
-          <span>
-            Game starts at {new Date(gameData.gameDate).toLocaleTimeString()}
-          </span>
-        ) : gameData.status === "post" ? (
-          <span>Final Score</span>
-        ) : (
-          <span>
-            {gameData.clock} - Q{gameData.quarter}
-          </span>
-        )}
       </div>
     </div>
   );
+}
+
+function TeamSection({ name, logo, score, color, isHome }) {
+  const textColor = isColorLight(color) ? "text-gray-800" : "text-white";
+  const darkModeText = "dark:text-gray-100";
+
+  return (
+    <div
+      className={`flex flex-col items-center space-y-2 ${textColor} ${darkModeText}`}
+    >
+      <div className="relative w-16 h-16 md:w-24 md:h-24">
+        <Image
+          src={logo}
+          alt={`${name} logo`}
+          layout="fill"
+          objectFit="contain"
+          className="rounded-full bg-white p-1"
+        />
+      </div>
+      <h2 className="text-lg md:text-xl font-bold text-center">{name}</h2>
+      <p className="text-3xl md:text-5xl font-bold">{score}</p>
+    </div>
+  );
+}
+
+// Helper function to determine text color based on background
+function isColorLight(color) {
+  const hex = color.replace("#", "");
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 155;
 }

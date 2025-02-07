@@ -15,6 +15,7 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+  @apply text-gray-900 dark:text-gray-100;
 }
 
 h1 {
@@ -179,7 +180,7 @@ input {
   border-right: 1px solid black;
   margin-left: -1px;
   /* Add shadow to right edge of sticky labels */
-  background-color: rgb(249, 250, 251); /* bg-gray-50 */
+  @apply bg-gray-50 dark:bg-gray-800;
   box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.2);
 }
 
@@ -213,16 +214,9 @@ input {
 }
 
 .square-height {
-  height: 6rem;
-  min-height: 4rem;
-  max-height: 6rem;
-  
-  /* Mobile height */
-  @media (max-width: 768px) {
-    height: 4rem;
-    min-height: 3rem;
-    max-height: 4rem;
-  }
+  height: var(--row-height, 6rem);
+  min-height: var(--row-height, 6rem);
+  max-height: var(--row-height, 6rem);
 }
 
 /* Adjust left label width */
@@ -243,4 +237,22 @@ input {
 button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); }
+  to { transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

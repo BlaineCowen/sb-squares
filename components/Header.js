@@ -39,33 +39,37 @@ export default function Header({ code }) {
   };
 
   return (
-    <header className="bg-blue-950 shadow-md p-4 flex justify-between items-center">
+    <header className="bg-white/75 dark:bg-gray-900/75 shadow-xl p-4 flex justify-between items-center animate-fade-in">
       <button
         onClick={() => router.push("/")}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 font-semibold hover:scale-105"
       >
         Home
       </button>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         {session ? (
           <>
-            <span className="text-center mx-4">
+            <span className="text-center mx-4 text-gray-800 dark:text-gray-200 font-medium">
               Welcome, {session.user.name}!
             </span>
             <button
               onClick={() => setShowColorPicker(!showColorPicker)}
-              className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
+              className="px-4 py-2 rounded-full border-2 border-white/20 hover:border-white/40 transition-colors duration-300 relative overflow-hidden group"
               style={{
-                backgroundColor:
-                  selectedColor || session?.user?.color || "#22c55e",
+                backgroundImage: `linear-gradient(to bottom right, 
+                  ${selectedColor || session?.user?.color || "#22c55e"}ff, 
+                  ${selectedColor || session?.user?.color || "#22c55e"}aa)`,
               }}
             >
-              Pick Color
+              <span className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors duration-300" />
+              <span className="relative z-10 text-white font-medium">
+                Pick Color
+              </span>
             </button>
             <button
               onClick={signOut}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+              className="bg-gradient-to-r from-red-500 to-pink-500 px-6 py-3 rounded-lg hover:scale-105 transition-transform duration-300 font-semibold shadow-lg hover:shadow-red-500/30"
             >
               Sign Out
             </button>
@@ -73,7 +77,7 @@ export default function Header({ code }) {
         ) : (
           <button
             onClick={() => signIn()}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="bg-blue-500 text-white dark:text-gray-100 px-4 py-2 rounded"
           >
             Sign In
           </button>

@@ -23,6 +23,8 @@ export default function GridPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSelecting, setIsSelecting] = useState(false);
   const [gridData, setGridData] = useState(null);
+  const [primaryColor, setPrimaryColor] = useState(null);
+  const [homePrimaryColor, setHomePrimaryColor] = useState(null);
 
   useEffect(() => {
     if (!code || !session) return;
@@ -121,6 +123,20 @@ export default function GridPage() {
     //     setSquares([]);
     //   }
     // };
+
+    const getPrimaryColor = (logoUrl) => {
+      const img = new Image();
+      img.src = logoUrl;
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, 1, 1).data;
+      return `#${data[0].toString(16).padStart(2, "0")}${data[1]
+        .toString(16)
+        .padStart(2, "0")}${data[2].toString(16).padStart(2, "0")}`;
+    };
 
     const fetchGridData = async () => {
       try {
@@ -261,7 +277,7 @@ export default function GridPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
       <Header />
       {gridData?.name && (
         <h1 className="text-center mt-4 !text-white">{gridData?.name}</h1>
