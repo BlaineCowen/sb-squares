@@ -1,13 +1,13 @@
 import { useRouter } from "next/router";
 
-import Grid from "../../components/Grid";
-import Header from "../../components/Header";
-import ScoreDisplay from "../../components/ScoreDisplay";
-import AdminModal from "../../components/AdminModal";
-import ShareIcon from "../../components/ShareIcon";
+import Grid from "../../src/components/Grid";
+import Header from "../../src/components/Header";
+import ScoreDisplay from "../../src/components/ScoreDisplay";
+import AdminModal from "../../src/components/AdminModal";
+import ShareIcon from "../../src/components/ShareIcon";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../src/components/LoadingSpinner";
 
 export default function GridPage() {
   const router = useRouter();

@@ -18,6 +18,11 @@ export default function Header({ code }) {
     }
   }, [session]);
 
+  const handleSignOut = async () => {
+    await router.push("/login");
+    await signOut();
+  };
+
   const updateUserColor = async (color) => {
     try {
       const response = await fetch("/api/user/color", {
@@ -68,7 +73,7 @@ export default function Header({ code }) {
               </span>
             </button>
             <button
-              onClick={signOut}
+              onClick={handleSignOut}
               className="bg-gray-200 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-gray-200 px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300 font-semibold hover:scale-105 text-sm md:text-base"
             >
               Sign Out

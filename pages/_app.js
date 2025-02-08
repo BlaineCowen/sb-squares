@@ -2,7 +2,7 @@ import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import ProtectedLayout from "../components/ProtectedLayout";
+import ProtectedLayout from "../src/components/ProtectedLayout";
 import { Analytics } from "@vercel/analytics/react";
 
 export default function App({

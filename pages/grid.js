@@ -1,5 +1,5 @@
-import Grid from "../components/Grid";
-import Header from "../components/Header";
+import Grid from "../src/components/Grid";
+import Header from "../src/components/Header";
 import { useSession } from "next-auth/react";
 
 GridPage.requiresAuth = true;
