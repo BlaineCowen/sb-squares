@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 
 export default function AdminModal({
   isOpen,
   onClose,
+  isLocked,
   gridCode,
   onUpdate,
   isProcessing,
+  isSortedByScores,
 }) {
-  const [tab, setTab] = useState("squares"); // squares or settings
+  const [tab, setTab] = useState("squares");
   const [gridSettings, setGridSettings] = useState({
     name: "",
     squarePrice: 5,
@@ -29,7 +31,20 @@ export default function AdminModal({
           "Are you sure you want to reset ALL squares? This cannot be undone."
         )
       ) {
-        await axios.post(`/api/admin/reset-squares?gridCode=${gridCode}`);
+        const response = await fetch(
+          `/api/admin/reset-squares?gridCode=${gridCode}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to reset squares");
+        }
+
         onUpdate();
         alert("All squares have been reset");
       }
@@ -41,28 +56,14 @@ export default function AdminModal({
 
   const handleLockGrid = async () => {
     try {
-      const response = await fetch(
-        `/api/admin/grid/lock?gridCode=${gridCode}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ randomize: false }),
-        }
-      );
-      onUpdate();
-      if (response.ok) {
-        alert("Grid locked!");
+      if (
+        !window.confirm(
+          "Are you sure you want to lock the grid? This will randomize the numbers and cannot be undone unless you reset the grid."
+        )
+      ) {
+        return;
       }
-    } catch (err) {
-      console.error("Error locking grid:", err);
-      alert("Failed to lock grid");
-    }
-  };
 
-  const handleRandomizeScores = async () => {
-    try {
       const response = await fetch(
         `/api/admin/grid/lock?gridCode=${gridCode}`,
         {
@@ -75,33 +76,16 @@ export default function AdminModal({
       );
       onUpdate();
       if (response.ok) {
-        alert("Scores randomized!");
+        alert("Grid locked and numbers randomized!");
       }
     } catch (err) {
-      console.error("Error randomizing scores:", err);
-      alert("Failed to randomize scores");
+      console.error("Error locking grid:", err);
+      alert("Failed to lock grid");
     }
-  };
 
-  const handleUnlockGrid = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/grid/unlock?gridCode=${gridCode}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      onUpdate();
-      if (response.ok) {
-        alert("Grid unlocked and scores cleared!");
-      }
-    } catch (err) {
-      console.error("Error unlocking grid:", err);
-      alert("Failed to unlock grid");
-    }
+    // randomize numbers
+    await axios.post(`/api/admin/grid/randomize?gridCode=${gridCode}`);
+    onUpdate();
   };
 
   const handleUpdateSettings = async () => {
@@ -113,6 +97,28 @@ export default function AdminModal({
       console.error("Error updating settings:", err);
       alert("Failed to update grid settings");
     }
+  };
+
+  const handleSortChange = async () => {
+    try {
+      const response = await fetch(`/api/grids/${gridCode}/toggle-sort`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sortState: !isSortedByScores }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update sort state");
+      }
+
+      onUpdate();
+    } catch (error) {
+      console.error("Error updating sort state:", error);
+      alert("Failed to update sort state");
+    }
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -151,34 +157,35 @@ export default function AdminModal({
 
         {tab === "squares" ? (
           <div className="space-y-4">
+            {!isLocked && (
+              <button
+                onClick={handleLockGrid}
+                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Lock Grid & Randomize Numbers
+              </button>
+            )}
+            {isLocked && !isSortedByScores && (
+              <button
+                onClick={handleSortChange}
+                className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Sort by Scores
+              </button>
+            )}
+            {isSortedByScores && (
+              <button
+                onClick={handleSortChange}
+                className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Unsort by Scores
+              </button>
+            )}
             <button
               onClick={handleResetSquares}
-              disabled={isProcessing}
               className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             >
-              {isProcessing ? (
-                <LoadingSpinner size={20} />
-              ) : (
-                "Reset All Squares"
-              )}
-            </button>
-            <button
-              onClick={handleLockGrid}
-              className="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-            >
-              Lock Grid
-            </button>
-            <button
-              onClick={handleRandomizeScores}
-              className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Randomize Numbers
-            </button>
-            <button
-              onClick={handleUnlockGrid}
-              className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            >
-              Unlock Grid
+              Reset All Squares
             </button>
           </div>
         ) : (

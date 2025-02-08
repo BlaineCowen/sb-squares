@@ -2,17 +2,21 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import ColorPickerModal from "./ColorPickerModal";
+import ColorPickerModal from "../src/components/ColorPickerModal";
 
 export default function Header({ code }) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const router = useRouter();
   const [userGrids, setUserGrids] = useState([]);
   const [selectedGrid, setSelectedGrid] = useState(code || "");
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(
-    session?.user?.color || "#000000"
-  );
+  const [selectedColor, setSelectedColor] = useState(null);
+
+  useEffect(() => {
+    if (session?.user?.color) {
+      setSelectedColor(session.user.color);
+    }
+  }, [session]);
 
   const updateUserColor = async (color) => {
     try {
@@ -22,6 +26,12 @@ export default function Header({ code }) {
         body: JSON.stringify({ color }),
       });
       if (!response.ok) throw new Error("Failed to update color");
+      const data = await response.json();
+      setSelectedColor(color);
+      await update({
+        ...session,
+        user: { ...session.user, color: data.user.color },
+      });
     } catch (error) {
       console.error("Error updating color:", error);
       alert("Failed to update color");
@@ -29,30 +39,37 @@ export default function Header({ code }) {
   };
 
   return (
-    <header className="bg-blue-950 shadow-md p-4 flex justify-between items-center">
+    <header className="bg-white/90 relative dark:bg-gray-900/90 shadow-xl p-4 flex justify-between items-center animate-fade-in backdrop-blur-lg z-50">
       <button
         onClick={() => router.push("/")}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="bg-gray-200 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-gray-200 px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300 font-semibold hover:scale-105 text-sm md:text-base"
       >
         Home
       </button>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-6">
         {session ? (
           <>
-            <span className="text-center mx-4">
+            <span className="hidden md:inline text-center mx-2 md:mx-4 text-gray-800 dark:text-gray-200 font-medium text-sm md:text-base">
               Welcome, {session.user.name}!
             </span>
             <button
               onClick={() => setShowColorPicker(!showColorPicker)}
-              className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
-              style={{ backgroundColor: selectedColor }}
+              className="w-10 h-10 md:w-auto md:h-auto px-2 py-2 md:px-4 md:py-2 rounded-full border-2 border-white/20 hover:border-white/40 transition-colors duration-300 relative overflow-hidden group"
+              style={{
+                backgroundImage: `linear-gradient(to bottom right, 
+                  ${selectedColor || session?.user?.color || "#22c55e"}ff, 
+                  ${selectedColor || session?.user?.color || "#22c55e"}aa)`,
+              }}
             >
-              Pick Color
+              <span className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors duration-300" />
+              <span className="hidden md:inline relative z-10 text-white font-medium text-sm md:text-base">
+                Pick Color
+              </span>
             </button>
             <button
               onClick={signOut}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+              className="bg-gray-200 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-gray-200 px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300 font-semibold hover:scale-105 text-sm md:text-base"
             >
               Sign Out
             </button>
@@ -60,7 +77,7 @@ export default function Header({ code }) {
         ) : (
           <button
             onClick={() => signIn()}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="bg-blue-500 text-white dark:text-gray-100 px-3 py-1.5 md:px-4 md:py-2 rounded text-sm md:text-base"
           >
             Sign In
           </button>
@@ -71,10 +88,9 @@ export default function Header({ code }) {
         onClose={() => setShowColorPicker(false)}
         onConfirm={async (color) => {
           await updateUserColor(color);
-          setSelectedColor(color);
           setShowColorPicker(false);
         }}
-        initialColor={selectedColor}
+        initialColor={selectedColor || session?.user?.color || "#22c55e"}
       />
     </header>
   );

@@ -3,19 +3,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { loadStripe } from "stripe";
 import SelectionModal from "./SelectionModal";
-import AdminModal from "./AdminModal";
-import ColorPickerModal from "./ColorPickerModal";
+import AdminModal from "../src/components/AdminModal";
+import ColorPickerModal from "../src/components/ColorPickerModal";
 import LoadingSpinner from "./LoadingSpinner";
 
-function AdminBanner({ isAdmin }) {
-  return isAdmin ? (
-    <div className="bg-yellow-400 text-black p-2 text-center font-bold">
-      ADMIN MODE ENABLED
-    </div>
-  ) : null;
-}
-
-export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
+export default function Grid({
+  gridCode,
+  isAdmin,
+  gameData,
+  onSquaresUpdate,
+  isSortedByScores,
+}) {
   const { data: session } = useSession();
   const [squares, setSquares] = useState([]);
   const [selectedSquare, setSelectedSquare] = useState(null);
@@ -34,6 +32,8 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
   );
   const [rowNumbers, setRowNumbers] = useState([...Array(10)].map((_, i) => i));
   const [isSelecting, setIsSelecting] = useState(false);
+  const [rowHeight, setRowHeight] = useState("6rem"); // Default desktop height
+  const userColor = session?.user?.color || "#22c55e";
 
   useEffect(() => {
     fetchGridData();
@@ -49,6 +49,19 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
     return () => clearInterval(interval);
   }, [gridCode]);
 
+  // Set row height based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const newHeight = window.innerWidth <= 768 ? "4.5rem" : "6rem";
+      setRowHeight(newHeight);
+      document.documentElement.style.setProperty("--row-height", newHeight);
+    };
+
+    handleResize(); // Initial set
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchGridData = async () => {
     try {
       const { data } = await axios.get(`/api/grids/${gridCode}`);
@@ -58,7 +71,7 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
         yScoreArr: data.yScoreArr === "?" ? "?" : JSON.parse(data.yScoreArr),
       });
 
-      if (data.isLocked) {
+      if (data.isLocked && !gridData.isSortedByScores) {
         setColumnNumbers(
           data.xScoreArr === "?" ? columnNumbers : JSON.parse(data.xScoreArr)
         );
@@ -74,11 +87,28 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
   const fetchSquares = async () => {
     try {
       const { data } = await axios.get(`/api/squares?gridCode=${gridCode}`);
-      // Data is already sorted from the API
-      setSquares(data);
+      let squaresToSet = data;
+
+      if (isSortedByScores) {
+        // Sort squares by away score (0-9) then home score (0-9)
+        squaresToSet = [...data].sort((a, b) => {
+          const aAway = parseInt(a.awayScore || "0");
+          const bAway = parseInt(b.awayScore || "0");
+          const aHome = parseInt(a.homeScore || "0");
+          const bHome = parseInt(b.homeScore || "0");
+
+          if (aAway !== bAway) {
+            return aAway - bAway;
+          }
+          return aHome - bHome;
+        });
+      }
+
+      setSquares(squaresToSet);
+
       // Call the callback with updated squares
       if (onSquaresUpdate) {
-        onSquaresUpdate(data);
+        onSquaresUpdate(squaresToSet);
       }
     } catch (error) {
       console.error("Error fetching squares:", error);
@@ -195,95 +225,111 @@ export default function Grid({ gridCode, isAdmin, gameData, onSquaresUpdate }) {
 
   return (
     <>
-      <div id="grid-content" className="grid-scroll-container">
+      <div
+        id="grid-content"
+        className="grid-scroll-container bg-white/5 rounded-2xl shadow-2xl"
+        style={{ "--row-height": rowHeight }}
+      >
         <div className="grid-inner-content grid grid-areas-layout">
           {squares.length > 0 && (
             <>
-              {/* Column labels (top) - Only render when gridData is loaded */}
+              {/* Column labels (top) */}
               <div className="grid-area-top grid grid-cols-10">
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
-                    className={`text-center text-sm bg-gray-50 text-gray-500 h-6 border-t border-l border-black ${
+                    className={`text-center text-sm bg-gradient-to-b from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-200 border-b-2 border-gray-200 dark:border-gray-700 font-semibold flex items-center justify-center ${
                       i === 9 ? "border-r" : ""
                     }`}
+                    style={{
+                      height: "calc(var(--row-height) * 0.4)",
+                      minHeight: "calc(var(--row-height) * 0.4)",
+                    }}
                   >
-                    {gridData.isLocked ? columnNumbers[i] : "?"}
+                    {gridData.isLocked && !isSortedByScores
+                      ? columnNumbers[i]
+                      : isSortedByScores
+                      ? i
+                      : "?"}
                   </div>
                 ))}
               </div>
 
-              {/* Row labels (left) - Only render when gridData is loaded */}
+              {/* Row labels (left) */}
               <div className="grid-area-left flex flex-col sticky left-0">
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
-                    className="square-height flex items-center justify-center bg-gray-50 text-gray-500 w-6 border border-black"
+                    className={`text-center text-sm bg-gradient-to-l from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-200 border-b-2 border-gray-200 dark:border-gray-700 font-semibold flex items-center justify-center`}
+                    style={{ height: "var(--row-height)" }}
                   >
-                    {gridData.isLocked ? rowNumbers[i] : "?"}
+                    {gridData.isLocked && !isSortedByScores
+                      ? rowNumbers[i]
+                      : isSortedByScores
+                      ? i
+                      : "?"}
                   </div>
                 ))}
               </div>
             </>
           )}
           <div className="grid-area-main grid grid-cols-10">
-            {squares.map((square) => (
-              <div
-                key={square.id}
-                className={`square ${(
-                  square.status || "AVAILABLE"
-                ).toLowerCase()} 
-                  bg-gray-50
-                  w-full square-height
-                  flex items-center justify-center overflow-hidden
-                  border border-black
-                  ${
-                    square.status === "APPROVED"
-                      ? "bg-yellow-200 text-black"
-                      : ""
-                  }
-                  ${!square.status ? "bg-blue-500 hover:bg-gray-100" : ""}
-                  ${
-                    square.status === "PENDING"
-                      ? "bg-yellow-200 text-black"
-                      : ""
-                  }
-                  cursor-pointer`}
-                style={{
-                  backgroundColor:
-                    square.status === "APPROVED"
-                      ? square?.owner?.color || "#22c55e" // green-500 as fallback
-                      : undefined,
-                }}
-                onClick={() => handleSquareSelect(square.x, square.y)}
-                disabled={!square.status || isSelecting}
-              >
-                <div className="flex flex-col items-center justify-center w-full h-full">
-                  <span className="text-sm font-medium text-center w-full truncate px-1">
-                    {square?.owner?.name ||
-                      (square.status === "APPROVED" && "✅")}
-                  </span>
-                  <div className="flex justify-between w-full px-2 mt-1 text-xs">
-                    {square.awayScore && (
-                      <span className="text-gray-600">
-                        A:{square.awayScore}
-                      </span>
-                    )}
-                    {square.homeScore && (
-                      <span className="text-gray-600">
-                        H:{square.homeScore}
-                      </span>
+            {squares.map((square) => {
+              const statusStyle = {
+                AVAILABLE: "bg-white hover:bg-gray-50",
+                PENDING: "bg-gradient-to-br",
+                APPROVED: "bg-gradient-to-br",
+              }[square.status];
+
+              const gradient =
+                square.status !== "AVAILABLE"
+                  ? {
+                      backgroundImage: `linear-gradient(to bottom right, 
+                  ${userColor}ff, 
+                  ${userColor}aa)`,
+                    }
+                  : {};
+
+              return (
+                <div
+                  key={square.id}
+                  className={`square border-2 border-gray-200/50 cursor-pointer 
+                    transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-lg 
+                    ${statusStyle}`}
+                  style={{
+                    height: "var(--row-height)",
+                    ...gradient,
+                  }}
+                  onClick={() => handleSquareSelect(square.x, square.y)}
+                  disabled={!square.status || isSelecting}
+                >
+                  <div className="flex flex-col items-center justify-center w-full h-full">
+                    <span className="text-sm font-medium text-center w-full truncate px-1">
+                      {square?.owner?.name ||
+                        (square.status === "APPROVED" && "✅")}
+                    </span>
+                    <div className="flex justify-between w-full px-2 mt-1 text-xs">
+                      {square.awayScore && (
+                        <span className="text-gray-600">
+                          A:{square.awayScore}
+                        </span>
+                      )}
+                      {square.homeScore && (
+                        <span className="text-gray-600">
+                          H:{square.homeScore}
+                        </span>
+                      )}
+                    </div>
+                    {square.status === "PENDING" && (
+                      <span className="text-xs">pending</span>
                     )}
                   </div>
-                  {square.status === "PENDING" && (
-                    <span className="text-xs">pending</span>
+                  {isSelecting && square === selectedSquare && (
+                    <LoadingSpinner size={20} />
                   )}
                 </div>
-                {isSelecting && square === selectedSquare && (
-                  <LoadingSpinner size={20} />
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

@@ -1,13 +1,13 @@
 import { useRouter } from "next/router";
 
-import Grid from "../../components/Grid";
-import Header from "../../components/Header";
-import ScoreDisplay from "../../components/ScoreDisplay";
-import AdminModal from "../../components/AdminModal";
-import ShareIcon from "../../components/ShareIcon";
+import Grid from "../../src/components/Grid";
+import Header from "../../src/components/Header";
+import ScoreDisplay from "../../src/components/ScoreDisplay";
+import AdminModal from "../../src/components/AdminModal";
+import ShareIcon from "../../src/components/ShareIcon";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import { useState, useEffect, useRef } from "react";
+import LoadingSpinner from "../../src/components/LoadingSpinner";
 
 export default function GridPage() {
   const router = useRouter();
@@ -17,11 +17,15 @@ export default function GridPage() {
   const [gameData, setGameData] = useState(null);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [isAdminActionLoading, setIsAdminActionLoading] = useState(false);
-  const [quarter, setQuarter] = useState(null);
-  const [quarterWinners, setQuarterWinners] = useState([]);
+
+  const [quarterWinners, setQuarterWinners] = useState(() => []);
   const [squares, setSquares] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSelecting, setIsSelecting] = useState(false);
+  const [gridData, setGridData] = useState(null);
+  const [primaryColor, setPrimaryColor] = useState(null);
+  const [homePrimaryColor, setHomePrimaryColor] = useState(null);
+  const prevQuarter = useRef(null);
 
   useEffect(() => {
     if (!code || !session) return;
@@ -45,19 +49,16 @@ export default function GridPage() {
     };
 
     const fetchGameData = async () => {
-      console.log("Fetching game data...");
       try {
         const response = await fetch("/api/game-data");
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers);
         if (!response.ok) {
           const errorData = await response.json();
           console.log("Error data:", errorData);
           throw new Error(errorData.error || "Failed to fetch game data");
         }
-        console.log("Response OK, parsing JSON...");
+
         const data = await response.json();
-        console.log("Parsed game data:", data);
+
         setGameData(data);
       } catch (error) {
         console.error("Error fetching game data:", {
@@ -65,6 +66,7 @@ export default function GridPage() {
           stack: error.stack,
           response: error.response,
         });
+
         // Set default game data on error
         setGameData({
           homeTeam: "Kansas City Chiefs",
@@ -87,32 +89,21 @@ export default function GridPage() {
       setIsLoading(false);
     };
 
-    const fetchSquares = async () => {
+    const fetchGridData = async () => {
       try {
-        const response = await fetch(`/api/squares?gridCode=${code}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch squares");
-        }
-        const data = await response.json();
-        setSquares(data);
-      } catch (error) {
-        console.error("Error fetching squares:", error);
-        setSquares([]);
-      }
-    };
-
-    const fetchData = async () => {
-      try {
+        const gridDataResponse = await fetch(`/api/grids/${code}/data`);
+        const gridData = await gridDataResponse.json();
+        setGridData(gridData);
+        // await fetchSquares();
         checkAdmin();
-        fetchGameData();
-        fetchSquares();
+        await fetchGameData();
       } catch (error) {
         console.error(error);
       }
     };
 
     if (code) {
-      fetchData();
+      fetchGridData();
     }
 
     // Set up polling for game data
@@ -122,87 +113,15 @@ export default function GridPage() {
 
   useEffect(() => {
     if (!gameData) return;
-    if (gameData.status === "post") {
-      setQuarter(10);
-    } else {
-      setQuarter(gameData.quarter);
-    }
+
+    // get quarter winners
+    const fetchQuarterWinners = async () => {
+      const response = await fetch(`/api/grids/${code}/winners`);
+      const data = await response.json();
+      setQuarterWinners(data);
+    };
+    fetchQuarterWinners();
   }, [gameData]);
-
-  useEffect(() => {
-    if (!quarter) return;
-    if (!squares.length) return; // Wait for squares data
-    if (!gameData) return;
-
-    if (quarter === 1) {
-      setQuarterWinners([]);
-    }
-
-    if (quarter === 2) {
-      // Get last digit of Q1 scores
-      const awayNumber = String(gameData.awayQ1 || 0).slice(-1);
-      const homeNumber = String(gameData.homeQ1 || 0).slice(-1);
-
-      // find square with winning numbers
-      const winningSquare = squares.find(
-        (square) =>
-          square.awayScore === awayNumber && square.homeScore === homeNumber
-      );
-      if (winningSquare) {
-        setQuarterWinners([winningSquare]);
-      }
-    }
-
-    if (quarter === 3) {
-      // Get last digit of Q2 scores
-      const awayNumber = String(gameData.awayQ1 + gameData.awayQ2 || 0).slice(
-        -1
-      );
-      const homeNumber = String(gameData.homeQ1 + gameData.homeQ2 || 0).slice(
-        -1
-      );
-
-      const winningSquare = squares.find(
-        (square) =>
-          square.awayScore === awayNumber && square.homeScore === homeNumber
-      );
-      if (winningSquare) {
-        setQuarterWinners((prev) => [...prev, winningSquare]);
-      }
-    }
-
-    if (quarter === 4) {
-      // Get last digit of Q3 scores
-      const awayNumber = String(
-        gameData.awayQ1 + gameData.awayQ2 + gameData.awayQ3 || 0
-      ).slice(-1);
-      const homeNumber = String(
-        gameData.homeQ1 + gameData.homeQ2 + gameData.homeQ3 || 0
-      ).slice(-1);
-
-      const winningSquare = squares.find(
-        (square) =>
-          square.awayScore === awayNumber && square.homeScore === homeNumber
-      );
-      if (winningSquare) {
-        setQuarterWinners((prev) => [...prev, winningSquare]);
-      }
-    }
-
-    if (quarter === 10) {
-      // Get last digit of final scores
-      const awayNumber = String(gameData.awayScore || 0).slice(-1);
-      const homeNumber = String(gameData.homeScore || 0).slice(-1);
-
-      const winningSquare = squares.find(
-        (square) =>
-          square.awayScore === awayNumber && square.homeScore === homeNumber
-      );
-      if (winningSquare) {
-        setQuarterWinners((prev) => [...prev, winningSquare]);
-      }
-    }
-  }, [quarter]); // Only run when quarter changes
 
   const handleSquareSelect = async (x, y) => {
     if (isSelecting) return;
@@ -237,17 +156,28 @@ export default function GridPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
       <Header />
+      {gridData?.name && (
+        <h1 className="text-center mt-4 ">{gridData?.name} </h1>
+      )}
+
       <div className="container mx-auto px-4 pt-4">
         <ScoreDisplay gameData={gameData} />
       </div>
-      <h3 className="text-center mt-4 !text-white">
-        Scores will be randomized by admin at game time
-      </h3>
-      <h2 className="text-center mt-4 !text-white">
-        Click on a square to claim
-      </h2>
+      {gridData?.isLocked && (
+        <h3 className="text-center mt-4 ">Grid is locked</h3>
+      )}
+      {!gridData?.isLocked && (
+        <h3 className="text-center mt-4 ">
+          Scores will be randomized by admin at game time
+        </h3>
+      )}
+      {gridData?.isLocked && gridData.randomizeQuarters && (
+        <h2 className="text-center mt-4">
+          Scores will be randomized every quarter
+        </h2>
+      )}
       <div id="grid-container" className="container">
         {/* Home Team Logo (left) */}
         {gameData && (
@@ -276,18 +206,34 @@ export default function GridPage() {
           isAdmin={isAdmin}
           gameData={gameData}
           onSquaresUpdate={setSquares}
+          isSortedByScores={gridData?.isSortedByScores}
         />
         <div id="spacer"></div>
       </div>
 
+      <div className="container mx-auto px-4 pt-4">
+        <h2 className="text-center mt-4">Quarter Winners</h2>
+      </div>
       {quarterWinners.length > 0 && (
-        <div id="quarter-winners">
-          <h2 className="text-center text-xl font-bold text-white mb-4">
-            Quarter Winners
-          </h2>
-          {quarterWinners.map((winner, index) => (
-            <div key={winner.id} className="text-center text-white mb-2">
-              {`Q${index + 1}: ${winner.owner?.name || "Unclaimed"}`}
+        <div className="container flex justify-center mx-auto px-4 pt-4">
+          {quarterWinners.map((winner) => (
+            <div
+              key={winner.quarter}
+              className="relative w-24 h-24 border border-gray-300 flex flex-col items-center justify-center text-sm"
+              style={{
+                backgroundColor: winner.winner.color || "#fff",
+                color: winner.winner.color ? "#fff" : "#000",
+              }}
+            >
+              <div className="absolute top-1 left-1 text-xs">
+                Q{winner.quarter}
+              </div>
+              <div className="font-bold">{winner.winner.name}</div>
+              <div className="flex gap-2">
+                <span>{winner.awayScore}</span>
+                <span>-</span>
+                <span>{winner.homeScore}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -324,10 +270,11 @@ export default function GridPage() {
       <AdminModal
         isOpen={showAdminModal}
         onClose={() => setShowAdminModal(false)}
+        isLocked={gridData?.isLocked}
         isProcessing={isAdminActionLoading}
-        gridCode={code}
+        gridData={gridData}
+        isSortedByScores={gridData?.isSortedByScores}
         onUpdate={() => {
-          // Refresh the grid component
           window.location.reload();
         }}
       />

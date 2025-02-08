@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Grid" ADD COLUMN     "randomQ2" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "randomQ3" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "randomQ4" BOOLEAN NOT NULL DEFAULT false;

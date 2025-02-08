@@ -56,9 +56,6 @@ export default async function handler(req, res) {
         include: { squares: true },
       });
 
-      console.log("Created grid:", grid.code);
-      console.log("Squares created:", grid.squares.length);
-
       return res.status(200).json(grid);
     } catch (error) {
       console.error("Full error details:", {

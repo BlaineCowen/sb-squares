@@ -13,7 +13,6 @@ async function initGameData() {
     }
 
     const data = await response.json();
-    console.log("Game data initialized:", data);
   } catch (error) {
     console.error("Init failed:", error);
   }

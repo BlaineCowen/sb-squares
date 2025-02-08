@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     const updated = await prisma.grid.update({
       where: { code: gridCode },
       data: {
-        isLocked: !randomize ? true : grid.isLocked,
+        isLocked: true,
         ...(randomize && {
           xScoreArr: JSON.stringify(xArr),
           yScoreArr: JSON.stringify(yArr),
@@ -71,7 +71,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Failed to lock grid" });
   }
 }
-
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

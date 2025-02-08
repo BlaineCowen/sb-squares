@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   const { code } = req.query;
-  const { name, squarePrice, payouts } = req.body;
+  const { name, squarePrice, payouts, randomizeQuarters } = req.body;
 
   try {
     const grid = await prisma.grid.findUnique({
@@ -43,6 +43,7 @@ export default async function handler(req, res) {
         payoutQ2: payouts.q2,
         payoutQ3: payouts.q3,
         payoutFinal: payouts.final,
+        randomizeQuarters,
       },
     });
 
