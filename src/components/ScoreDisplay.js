@@ -34,7 +34,7 @@ export default function ScoreDisplay({ gameData }) {
     homeScore,
     status,
     quarter,
-    time,
+    clock,
     awayLogo,
     homeLogo,
     awayColor = "#E31837",
@@ -62,8 +62,8 @@ export default function ScoreDisplay({ gameData }) {
           {/* Game Info */}
           <div className="text-center space-y-2 bg-black/30 p-4 rounded-xl">
             <p className="text-xl md:text-2xl font-semibold">Q{quarter}</p>
-            <p className="text-2xl md:text-4xl font-bold">{time}</p>
-            <p className="text-sm uppercase tracking-wider">{status}</p>
+
+            <p className="text-sm uppercase tracking-wider">{clock}</p>
           </div>
 
           {/* Away Team */}

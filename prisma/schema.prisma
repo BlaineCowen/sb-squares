@@ -19,6 +19,7 @@ model User {
   grids         Grid[]
   sessions      Session[]
   squares       Square[]
+  quarterWinners QuarterWinner[]
 }
 
 model Square {
@@ -87,10 +88,14 @@ model Grid {
   payoutFinal Int      @default(25)
   isLocked    Boolean  @default(false)
   isSortedByScores Boolean @default(false)
+  randomQ2 Boolean @default(false)
+  randomQ3 Boolean @default(false)
+  randomQ4 Boolean @default(false)
   createdAt   DateTime @default(now())
   owner       User     @relation(fields: [ownerId], references: [id])
   ownerId     String
   squares     Square[]
+  quarterWinners QuarterWinner[]
 }
 
 model GameData {
@@ -118,4 +123,18 @@ model GameData {
   updatedAt DateTime @updatedAt
 
   @@index([gameId])
+}
+
+model QuarterWinner {
+  id        String   @id @default(uuid())
+  gridId    String
+  grid      Grid     @relation(fields: [gridId], references: [id])
+  quarter   Int
+  winnerId  String?
+  winner    User?    @relation(fields: [winnerId], references: [id])
+  awayScore String
+  homeScore String
+  createdAt DateTime @default(now())
+  
+  @@unique([gridId, quarter])
 }

@@ -27,7 +27,6 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignIn = () => {
-    console.log("Initiating Google sign-in with callback URL:", callbackUrl);
     signIn("google", { callbackUrl });
   };
 

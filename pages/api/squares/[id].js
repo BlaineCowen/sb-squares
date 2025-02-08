@@ -4,7 +4,6 @@ import { authOptions } from "../../../pages/api/auth/[...nextauth]";
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
-  console.log("Session data:", session?.user);
 
   const user = await prisma.user.findUnique({
     where: { email: session?.user?.email },

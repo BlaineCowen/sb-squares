@@ -72,12 +72,6 @@ export default async function handler(req, res) {
                 }
               : newScores;
 
-            console.log(`Updating square ${square.id}:`, {
-              x: square.x,
-              y: square.y,
-              ...scores,
-            });
-
             await prisma.square.update({
               where: { id: square.id },
               data: {

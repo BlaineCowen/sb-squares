@@ -6,7 +6,6 @@ GridPage.requiresAuth = true;
 
 export default function GridPage() {
   const { data: session } = useSession();
-  console.log("Grid session:", session);
 
   return (
     <>

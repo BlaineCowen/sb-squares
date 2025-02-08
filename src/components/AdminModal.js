@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { XSquare } from "lucide-react";
 
 export default function AdminModal({
   isOpen,
   onClose,
   isLocked,
-  gridCode,
+  gridData,
   onUpdate,
   isProcessing,
   isSortedByScores,
@@ -19,13 +20,24 @@ export default function AdminModal({
     name: "",
     squarePrice: 5,
     randomizeQuarters: false,
-    payouts: {
-      q1: 25,
-      q2: 25,
-      q3: 25,
-      final: 25,
-    },
+    payouts: { q1: 25, q2: 25, q3: 25, final: 25 },
   });
+
+  useEffect(() => {
+    if (gridData) {
+      setGridSettings({
+        name: gridData.name || "",
+        squarePrice: gridData.squarePrice || 5,
+        randomizeQuarters: gridData.randomizeQuarters || false,
+        payouts: {
+          q1: gridData.payouts?.q1 || 25,
+          q2: gridData.payouts?.q2 || 25,
+          q3: gridData.payouts?.q3 || 25,
+          final: gridData.payouts?.final || 25,
+        },
+      });
+    }
+  }, [gridData]);
 
   const handleResetSquares = async () => {
     try {
@@ -35,7 +47,7 @@ export default function AdminModal({
         )
       ) {
         const response = await fetch(
-          `/api/admin/reset-squares?gridCode=${gridCode}`,
+          `/api/admin/reset-squares?gridCode=${gridData.code}`,
           {
             method: "POST",
             headers: {
@@ -67,7 +79,7 @@ export default function AdminModal({
       }
 
       const response = await fetch(
-        `/api/admin/grid/lock?gridCode=${gridCode}`,
+        `/api/admin/grid/lock?gridCode=${gridData.code}`,
         {
           method: "POST",
           headers: {
@@ -86,13 +98,13 @@ export default function AdminModal({
     }
 
     // randomize numbers
-    await axios.post(`/api/admin/grid/randomize?gridCode=${gridCode}`);
+    await axios.post(`/api/admin/grid/randomize?gridCode=${gridData.code}`);
     onUpdate();
   };
 
   const handleUpdateSettings = async () => {
     try {
-      await axios.put(`/api/grids/${gridCode}/settings`, gridSettings);
+      await axios.put(`/api/grids/${gridData.code}/settings`, gridSettings);
       alert("Grid settings updated successfully");
       onClose();
     } catch (err) {
@@ -103,7 +115,7 @@ export default function AdminModal({
 
   const handleSortChange = async () => {
     try {
-      const response = await fetch(`/api/grids/${gridCode}/toggle-sort`, {
+      const response = await fetch(`/api/grids/${gridData.code}/toggle-sort`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,6 +145,13 @@ export default function AdminModal({
       >
         <div className="bg-white/90 text-black backdrop-blur-sm shadow-xl relative rounded-t-sm rounded-b-lg transition-all duration-300 ease-in-out animate-slide-in">
           <div className="p-6">
+            {/* add a close button using shadcn */}
+            <button
+              onClick={onClose}
+              className="absolute top-2 right-2 hover:bg-gray-200 rounded-full p-2"
+            >
+              <XSquare className="w-8 h-8" />
+            </button>
             <h1 className="text-2xl !text-black font-bold text-center mb-2">
               Admin Controls
             </h1>
@@ -215,7 +234,7 @@ export default function AdminModal({
                             name: e.target.value,
                           })
                         }
-                        placeholder="Enter grid name"
+                        placeholder={gridSettings.name}
                       />
                     </div>
 
