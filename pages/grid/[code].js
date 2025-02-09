@@ -208,6 +208,7 @@ export default function GridPage() {
           gameData={gameData}
           onSquaresUpdate={setSquares}
           isSortedByScores={gridData?.isSortedByScores}
+          squarePrice={gridData?.squarePrice}
         />
         <div id="spacer"></div>
       </div>

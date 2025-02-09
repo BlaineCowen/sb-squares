@@ -13,6 +13,7 @@ export default function Grid({
   gameData,
   onSquaresUpdate,
   isSortedByScores,
+  squarePrice,
 }) {
   const { data: session } = useSession();
   const [squares, setSquares] = useState([]);
@@ -337,6 +338,7 @@ export default function Grid({
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={handleConfirm}
+        price={squarePrice}
       />
 
       {adminActionModal && (

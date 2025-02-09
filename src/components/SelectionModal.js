@@ -1,8 +1,6 @@
 import { useState } from "react";
 
-export default function SelectionModal({ isOpen, onClose, onConfirm }) {
-  const [price, setPrice] = useState(5);
-
+export default function SelectionModal({ isOpen, onClose, onConfirm, price }) {
   if (!isOpen) return null;
 
   return (
