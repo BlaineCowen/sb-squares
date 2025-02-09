@@ -1,11 +1,20 @@
 import prisma from "../../../lib/prisma";
 
 export default async function handler(req, res) {
-  // Add basic auth or other security measure
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: "Unauthorized" });
+  const { method, headers } = req;
+
+  // Check for the correct method
+  if (method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Check for a valid secret token
+  const secret = process.env.CRON_SECRET;
+  if (headers["x-cron-secret"] !== secret) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // Your cron job logic here
   try {
     const response = await fetch(
       "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?&dates=2025#"
@@ -89,7 +98,7 @@ export default async function handler(req, res) {
 
     return res.json(gameData);
   } catch (error) {
-    console.error("Update game error:", error);
-    res.status(500).json({ error: "Failed to update game data" });
+    console.error("Error updating game:", error);
+    res.status(500).json({ error: "Failed to update game" });
   }
 }
