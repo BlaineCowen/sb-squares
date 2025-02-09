@@ -26,6 +26,7 @@ export default function GridPage() {
   const [primaryColor, setPrimaryColor] = useState(null);
   const [homePrimaryColor, setHomePrimaryColor] = useState(null);
   const prevQuarter = useRef(null);
+  const [userColor, setUserColor] = useState(null);
 
   useEffect(() => {
     if (!code || !session) return;

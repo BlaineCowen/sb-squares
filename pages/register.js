@@ -24,6 +24,9 @@ export default function Register() {
   });
   const [error, setError] = useState("");
 
+  // get callback url
+  const callbackUrl = router.query.callbackUrl || "/";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -57,7 +60,7 @@ export default function Register() {
         throw new Error(result.error);
       }
 
-      router.push("/");
+      router.push(callbackUrl);
     } catch (error) {
       setError(error.message);
     }

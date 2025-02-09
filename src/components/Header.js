@@ -1,14 +1,12 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import ColorPickerModal from "./ColorPickerModal";
+import ColorPickerModal from "../components/ColorPickerModal";
+import { Button } from "../components/ui/button";
 
-export default function Header({ code }) {
+export default function Header({ code, onColorChange }) {
   const { data: session, update } = useSession();
   const router = useRouter();
-  const [userGrids, setUserGrids] = useState([]);
-  const [selectedGrid, setSelectedGrid] = useState(code || "");
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
 
@@ -31,12 +29,14 @@ export default function Header({ code }) {
         body: JSON.stringify({ color }),
       });
       if (!response.ok) throw new Error("Failed to update color");
-      const data = await response.json();
+
+      // Update local state
       setSelectedColor(color);
-      await update({
-        ...session,
-        user: { ...session.user, color: data.user.color },
-      });
+
+      // Notify parent components of color change
+      if (onColorChange) {
+        onColorChange(color);
+      }
     } catch (error) {
       console.error("Error updating color:", error);
       alert("Failed to update color");
@@ -45,12 +45,12 @@ export default function Header({ code }) {
 
   return (
     <header className="bg-white/90 relative dark:bg-gray-900/90 shadow-xl p-4 flex justify-between items-center animate-fade-in backdrop-blur-lg z-50">
-      <button
+      <Button
         onClick={() => router.push("/")}
-        className="bg-gray-200 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-gray-200 px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300 font-semibold hover:scale-105 text-sm md:text-base"
+        className="bg-gray-200 h-full dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-gray-200 px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300 font-semibold hover:scale-105 text-sm md:text-base"
       >
         Home
-      </button>
+      </Button>
 
       <div className="flex items-center gap-3 md:gap-6">
         {session ? (

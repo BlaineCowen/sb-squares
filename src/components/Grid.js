@@ -13,6 +13,7 @@ export default function Grid({
   gameData,
   onSquaresUpdate,
   isSortedByScores,
+  userColor,
 }) {
   const { data: session } = useSession();
   const [squares, setSquares] = useState([]);
@@ -33,7 +34,6 @@ export default function Grid({
   const [rowNumbers, setRowNumbers] = useState([...Array(10)].map((_, i) => i));
   const [isSelecting, setIsSelecting] = useState(false);
   const [rowHeight, setRowHeight] = useState("6rem"); // Default desktop height
-  const userColor = session?.user?.color || "#22c55e";
 
   useEffect(() => {
     fetchGridData();
@@ -61,6 +61,23 @@ export default function Grid({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Update squares when user color changes
+  useEffect(() => {
+    if (userColor && squares.length > 0) {
+      setSquares(
+        squares.map((square) => {
+          if (square.owner?.email === session?.user?.email) {
+            return {
+              ...square,
+              owner: { ...square.owner, color: userColor },
+            };
+          }
+          return square;
+        })
+      );
+    }
+  }, [userColor, session?.user?.email]);
 
   const fetchGridData = async () => {
     try {
@@ -285,8 +302,8 @@ export default function Grid({
                 square.status !== "AVAILABLE"
                   ? {
                       backgroundImage: `linear-gradient(to bottom right, 
-                  ${userColor}ff, 
-                  ${userColor}aa)`,
+                  ${square.owner.color}ff, 
+                  ${square.owner.color}aa)`,
                     }
                   : {};
 

@@ -81,20 +81,22 @@ export default async function handler(req, res) {
           let awayTotal, homeTotal;
           switch (prevQuarter) {
             case 1:
-              awayTotal = gameData.awayQ1;
-              homeTotal = gameData.homeQ1;
+              awayTotal = prevGameData.awayQ1;
+              homeTotal = prevGameData.homeQ1;
               break;
             case 2:
-              awayTotal = gameData.awayQ1 + gameData.awayQ2;
-              homeTotal = gameData.homeQ1 + gameData.homeQ2;
+              awayTotal = prevGameData.awayQ1 + prevGameData.awayQ2;
+              homeTotal = prevGameData.homeQ1 + prevGameData.homeQ2;
               break;
             case 3:
-              awayTotal = gameData.awayQ1 + gameData.awayQ2 + gameData.awayQ3;
-              homeTotal = gameData.homeQ1 + gameData.homeQ2 + gameData.homeQ3;
+              awayTotal =
+                prevGameData.awayQ1 + prevGameData.awayQ2 + prevGameData.awayQ3;
+              homeTotal =
+                prevGameData.homeQ1 + prevGameData.homeQ2 + prevGameData.homeQ3;
               break;
             case 4:
-              awayTotal = gameData.awayScore;
-              homeTotal = gameData.homeScore;
+              awayTotal = prevGameData.awayScore;
+              homeTotal = prevGameData.homeScore;
               break;
           }
 
