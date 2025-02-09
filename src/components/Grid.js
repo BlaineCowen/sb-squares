@@ -5,7 +5,7 @@ import { loadStripe } from "stripe";
 import SelectionModal from "./SelectionModal";
 import AdminModal from "./AdminModal";
 import ColorPickerModal from "./ColorPickerModal";
-import LoadingSpinner from "./LoadingSpinner";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function Grid({
   gridCode,
@@ -13,7 +13,6 @@ export default function Grid({
   gameData,
   onSquaresUpdate,
   isSortedByScores,
-  userColor,
 }) {
   const { data: session } = useSession();
   const [squares, setSquares] = useState([]);
@@ -61,23 +60,6 @@ export default function Grid({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  // Update squares when user color changes
-  useEffect(() => {
-    if (userColor && squares.length > 0) {
-      setSquares(
-        squares.map((square) => {
-          if (square.owner?.email === session?.user?.email) {
-            return {
-              ...square,
-              owner: { ...square.owner, color: userColor },
-            };
-          }
-          return square;
-        })
-      );
-    }
-  }, [userColor, session?.user?.email]);
 
   const fetchGridData = async () => {
     try {

@@ -1,12 +1,13 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ProtectedLayout({ children }) {
   const { status } = useSession();
   const router = useRouter();
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (status === "unauthenticated") {

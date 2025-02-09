@@ -7,7 +7,7 @@ import AdminModal from "../../src/components/AdminModal";
 import ShareIcon from "../../src/components/ShareIcon";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
-import LoadingSpinner from "../../src/components/LoadingSpinner";
+import { LoadingSpinner } from "@/components/ui/loading-spinner.js";
 
 export default function GridPage() {
   const router = useRouter();

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import ColorPickerModal from "../components/ColorPickerModal";
 import { Button } from "../components/ui/button";
 
-export default function Header({ code, onColorChange }) {
+export default function Header({ code }) {
   const { data: session, update } = useSession();
   const router = useRouter();
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -33,10 +33,11 @@ export default function Header({ code, onColorChange }) {
       // Update local state
       setSelectedColor(color);
 
-      // Notify parent components of color change
-      if (onColorChange) {
-        onColorChange(color);
-      }
+      // Update session without triggering a re-render
+      // await update({
+      //   ...session,
+      //   user: { ...session.user, color },
+      // });
     } catch (error) {
       console.error("Error updating color:", error);
       alert("Failed to update color");

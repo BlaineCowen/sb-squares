@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import LoadingSpinner from "./LoadingSpinner";
 
 export default function AdminModal({
   isOpen,

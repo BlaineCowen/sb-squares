@@ -3,7 +3,6 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { XSquare } from "lucide-react";
 
 export default function AdminModal({

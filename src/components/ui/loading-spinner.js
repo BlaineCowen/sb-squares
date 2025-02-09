@@ -1,4 +1,4 @@
-export default function LoadingSpinner({ size = 24 }) {
+export function LoadingSpinner({ size = 24 }) {
   return (
     /* From Uiverse.io by clarencedion */
     <div className="flex items-center justify-center">

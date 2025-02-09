@@ -5,7 +5,7 @@ import { loadStripe } from "stripe";
 import SelectionModal from "./SelectionModal";
 import AdminModal from "../src/components/AdminModal";
 import ColorPickerModal from "../src/components/ColorPickerModal";
-import LoadingSpinner from "./LoadingSpinner";
+import { LoadingSpinner } from "@components/ui/loading-spinner";
 
 export default function Grid({
   gridCode,

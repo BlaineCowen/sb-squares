@@ -2,7 +2,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import LoadingSpinner from "@/components/LoadingSpinner";
+
 import MainLayout from "@/components/MainLayout";
 import { FaGoogle } from "react-icons/fa";
 import { Label } from "@/components/ui/label";
