@@ -131,47 +131,48 @@ export default async function handler(req, res) {
 
           // Find grids that need randomization
           if (currentQuarter === 1) {
+            console.log("Skipping quarter 1");
             continue;
-          }
-
-          const gridsToRandomize = await prisma.grid.findMany({
-            where: {
-              randomizeQuarters: true,
-              isLocked: true,
-              [`randomQ${currentQuarter}`]: false,
-            },
-            include: {
-              squares: true,
-            },
-          });
-
-          for (const grid of gridsToRandomize) {
-            // Generate new random arrays
-            const xArr = shuffleArray([...Array(10)].map((_, i) => i));
-            const yArr = shuffleArray([...Array(10)].map((_, i) => i));
-
-            // Update squares with new scores
-            await Promise.all(
-              grid.squares.map(async (square) => {
-                await prisma.square.update({
-                  where: { id: square.id },
-                  data: {
-                    awayScore: xArr[square.x].toString(),
-                    homeScore: yArr[square.y].toString(),
-                  },
-                });
-              })
-            );
-
-            // Update grid score arrays
-            await prisma.grid.update({
-              where: { id: grid.id },
-              data: {
-                [`randomQ${currentQuarter}`]: true,
-                xScoreArr: JSON.stringify(xArr),
-                yScoreArr: JSON.stringify(yArr),
+          } else {
+            const gridsToRandomize = await prisma.grid.findMany({
+              where: {
+                randomizeQuarters: true,
+                isLocked: true,
+                [`randomQ${currentQuarter}`]: false,
+              },
+              include: {
+                squares: true,
               },
             });
+
+            for (const grid of gridsToRandomize) {
+              // Generate new random arrays
+              const xArr = shuffleArray([...Array(10)].map((_, i) => i));
+              const yArr = shuffleArray([...Array(10)].map((_, i) => i));
+
+              // Update squares with new scores
+              await Promise.all(
+                grid.squares.map(async (square) => {
+                  await prisma.square.update({
+                    where: { id: square.id },
+                    data: {
+                      awayScore: xArr[square.x].toString(),
+                      homeScore: yArr[square.y].toString(),
+                    },
+                  });
+                })
+              );
+
+              // Update grid score arrays
+              await prisma.grid.update({
+                where: { id: grid.id },
+                data: {
+                  [`randomQ${currentQuarter}`]: true,
+                  xScoreArr: JSON.stringify(xArr),
+                  yScoreArr: JSON.stringify(yArr),
+                },
+              });
+            }
           }
         }
       }
