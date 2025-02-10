@@ -19,10 +19,10 @@ async function simulateGameData() {
     const baseData = {
       gameId: "superbowl2024",
       homeTeam: "Kansas City Chiefs",
-      awayTeam: "San Francisco 49ers",
+      awayTeam: "Philadelphia Eagles",
       homeLogo: "https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",
-      awayLogo: "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png",
-      homeScore: 0,
+      awayLogo: "https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
+      homeScore: 7,
       awayScore: 0,
       homeQ1: 0,
       awayQ1: 0,

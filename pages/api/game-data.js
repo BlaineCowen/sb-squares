@@ -130,6 +130,10 @@ export default async function handler(req, res) {
           };
 
           // Find grids that need randomization
+          if (currentQuarter === 1) {
+            continue;
+          }
+
           const gridsToRandomize = await prisma.grid.findMany({
             where: {
               randomizeQuarters: true,
