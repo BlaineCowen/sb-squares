@@ -34,8 +34,8 @@ async function simulateGameData() {
       awayQ4: 0,
       status: "in-progress",
       quarter: 1,
-      clock: "15:00",
-      gameDate: new Date("2024-02-11T23:30:00.000Z"),
+      clock: "1:00",
+      gameDate: "2025-02-10T00:29:05.209Z",
     };
 
     // Use current game data or base data
